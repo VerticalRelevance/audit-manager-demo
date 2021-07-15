@@ -1,23 +1,23 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: Uses AWS CodePipeline for CI/CD deployment of PCI Remediation Conformance Pack
+Description: Uses AWS CodePipeline for CI/CD deployment of Audit Manager Automation
 
 ## Parameters
 Parameters:
 
   RepositoryName:
-    Description: CodeCommit Repository for PCI Remediation Conformance Pack templates
+    Description: CodeCommit Repository for Audit Manager 
     Type: String
-    Default: PCIDevSecOps
+    Default: AuditManager
 
   BranchName:
-    Description: Branch in the CodeCommit Repsitory for PCI Remediation CloudFormation templates
+    Description: Branch in the CodeCommit Repsitory
     Type: String
     Default: master
 
-  ConformancePackStagingBucket:
-    Description: Conformance Pack Staging Bucket
+  AuditManagerFrameworkBucket:
+    Description: Bucket that holds Audit Manager assets
     Type: String
-    Default: s3-pciautohealconfpack-<AccountId>-<Region>
+    Default: s3-auditmanagerframework-794551265196-us-east-1
 
 Resources:
 
@@ -83,59 +83,20 @@ Resources:
                     - ':'
                     - !Ref 'AWS::AccountId'
                     - ':'
-                    - !Ref PCIAutohealConformancePackPipeline
-
-  AmazonCloudWatchEventRule:
-    Type: 'AWS::Events::Rule'
-    Properties:
-      EventPattern:
-        source:
-          - aws.codecommit
-        detail-type:
-          - CodeCommit Repository State Change
-        resources:
-          - !Join 
-            - ''
-            - - 'arn:aws:codecommit:'
-              - !Ref 'AWS::Region'
-              - ':'
-              - !Ref 'AWS::AccountId'
-              - ':'
-              - !Ref RepositoryName
-        detail:
-          event:
-            - referenceCreated
-            - referenceUpdated
-          referenceType:
-            - branch
-          referenceName:
-            - master
-      Targets:
-        - Arn: !Join 
-            - ''
-            - - 'arn:aws:codepipeline:'
-              - !Ref 'AWS::Region'
-              - ':'
-              - !Ref 'AWS::AccountId'
-              - ':'
-              - !Ref PCIAutohealConformancePackPipeline
-          RoleArn: !GetAtt 
-            - AmazonCloudWatchEventRole
-            - Arn
-          Id: pciconfpack-pipeline
+                    - !Ref AuditManagerAutomationPipeline
 
 #Pipeline
-  PCIAutohealConformancePackPipeline:
+  AuditManagerAutomationPipeline:
     Type: 'AWS::CodePipeline::Pipeline'
     Properties:
-      Name: pciconfpack-pipeline
+      Name: auditmanagerautomation-pipeline
       RoleArn: !GetAtt 
         - CodePipelineServiceRole
         - Arn
       Stages:
         - Name: Source
           Actions:
-            - Name: PCIConfPackSource
+            - Name: Source
               ActionTypeId:
                 Category: Source
                 Owner: AWS
@@ -150,7 +111,7 @@ Resources:
               RunOrder: 1
         - Name: Build
           Actions:
-            - Name: PCIConfPackBuild
+            - Name: Build
               InputArtifacts:
                 - Name: SourceOutput
               ActionTypeId:
@@ -277,10 +238,10 @@ Resources:
               Resource: '*'
 
         
-  PCIConfPackLogGroup:
+  AuditManagerAutomationLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /codepipeline/pci-autoheal-confpack-${AWS::StackName}
+      LogGroupName: !Sub /codepipeline/audit-manager-automation-${AWS::StackName}
 
   CodeBuildProject:
     Type: 'AWS::CodeBuild::Project'
@@ -298,7 +259,7 @@ Resources:
           Value: !Ref 'AWS::Region'
         - Name: STAGING_BUCKET
           Type: PLAINTEXT
-          Value: !Ref ConformancePackStagingBucket
+          Value: !Ref AuditManagerFrameworkBucket
         - Name: PIPELINE_NAME
           Type: PLAINTEXT
           Value: !Ref 'AWS::StackName'
@@ -307,7 +268,7 @@ Resources:
         Type: LINUX_CONTAINER  
       LogsConfig:
         CloudWatchLogs:
-          GroupName: !Ref PCIConfPackLogGroup
+          GroupName: !Ref AuditManagerAutomationLogGroup
           Status: ENABLED
       ServiceRole: !GetAtt CodePipelineServiceRole.Arn
       Source:
