@@ -6,7 +6,7 @@ Parameters:
   SourceBucket:
     Description: S3 Bucket that contains the Custom Audit Manager Framework Lambda 
     Type: String
-    Default: 's3-auditmanagerframework-794551265196-us-east-1/CustomAuditManagerFramework_Lambda/'
+    Default: 's3-auditmanagerframework-794551265196-us-east-1'
     MinLength: '1'
     MaxLength: '255'
   ConfPackControlsMappingFile:
