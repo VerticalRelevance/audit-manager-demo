@@ -272,6 +272,6 @@ Resources:
           Status: ENABLED
       ServiceRole: !GetAtt CodePipelineServiceRole.Arn
       Source:
-        BuildSpec: 'buildspec.yml'
+        BuildSpec: 'cfn/buildspec.yml'
         Type: CODEPIPELINE
       TimeoutInMinutes: 10
