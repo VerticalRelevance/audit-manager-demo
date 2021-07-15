@@ -8,9 +8,10 @@ phases:
             - echo "S3 Upload Beginning"
             - python -V
             - export ACCID=$(aws sts get-caller-identity --query 'Account' | tr -d '"')
-            - aws s3 cp /lambda/auditmanagerlayer.zip s3://$STAGING_BUCKET/
-            - aws s3 cp /lambda/CustomAuditManagerFramework_Lambda.zip s3://$STAGING_BUCKET/CustomAuditManagerFramework_Lambda/
-            - aws s3 cp /mappingfile/nistmappingcsv1.csv s3://$STAGING_BUCKET/
+            - ls -la
+            - aws s3 cp ./lambda/auditmanagerlayer.zip s3://$STAGING_BUCKET/
+            - aws s3 cp ./lambda/CustomAuditManagerFramework_Lambda.zip s3://$STAGING_BUCKET/CustomAuditManagerFramework_Lambda/
+            - aws s3 cp ./mappingfile/nistmappingcsv1.csv s3://$STAGING_BUCKET/
             - echo "S3 Upload Complete, updating cloudformation now..."
             - aws cloudformation deploy --template-file /cfn/aws-auditmanager-confpack.yml --stack-name auditmanager-confpack --parameter-overrides SourceBucket='s3-auditmanagerframework-794551265196-us-east-1/CustomAuditManagerFramework_Lambda/' ConfPackControlsMappingFile='nistmappingcsv1.csv' --capabilities CAPABILITY_NAMED_IAM
             - aws cloudformation deploy --template-file /cfn/aws-auditmanager-customassessment.yml --stack-name auditmanager-customassessment --parameter-overrides AssessmentDestination='s3://s3-customauditmanagerframework-794551265196-us-east-1/evidences/' AuditOwnerArn='arn:aws:iam::794551265196:user/AuditManagerAdmin' --capabilities CAPABILITY_NAMED_IAM
